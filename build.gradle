@@ -6,149 +6,49 @@ plugins {
 }
 
 group = 'com.example'
-version = '1.0-SNAPSHOT'
-
-sourceCompatibility = '11'
-targetCompatibility = '11'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    // Dépendances principales (ajoutez les vôtres si nécessaire)
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.14'
-
-    // Dépendances de test
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
-    testImplementation 'org.mockito:mockito-core:5.3.1'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.14'
-
-    // Cucumber pour les tests BDD
-    testImplementation 'io.cucumber:cucumber-java:7.13.0'
-    testImplementation 'io.cucumber:cucumber-junit:7.13.0'
-    testImplementation 'io.cucumber:cucumber-spring:7.13.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    // Ajoutez Cucumber si vous en avez :
+    // testImplementation 'io.cucumber:cucumber-java:7.13.0'
+    // testImplementation 'io.cucumber:cucumber-junit:7.13.0'
 }
 
-// Configuration des tests
 test {
     useJUnitPlatform()
-    finalizedBy jacocoTestReport
-
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat "full"
-    }
 }
 
-// Configuration Jacoco pour la couverture de code
-jacoco {
-    toolVersion = "0.8.10"
-}
-
-jacocoTestReport {
-    dependsOn test
-
-    reports {
-        xml.required = true
-        html.required = true
-        csv.required = false
-    }
-
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                    '**/config/**',
-                    '**/dto/**',
-                    '**/entity/**',
-                    '**/exception/**'
-            ])
-        }))
-    }
-}
-
-// Configuration SonarQube
 sonarqube {
     properties {
         property "sonar.projectKey", "TPOGLJenkins"
-        property "sonar.projectName", "TPOGL Jenkins Project"
+        property "sonar.projectName", "TP OGL Jenkins"
         property "sonar.host.url", "http://localhost:9000"
-        property "sonar.sourceEncoding", "UTF-8"
-        property "sonar.java.source", "11"
+        property "sonar.sources", "src/main/java"
+        property "sonar.tests", "src/test/java"
         property "sonar.java.binaries", "build/classes/java/main"
-        property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
     }
 }
 
-// Configuration Maven Publishing (pour MyMavenRepo)
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId = project.group
-            artifactId = project.name
-            version = project.version
-
+            groupId = 'com.example'
+            artifactId = 'TPOGLJenkins'
+            version = '1.0.0'
             from components.java
-
-            pom {
-                name = 'TPOGL Jenkins Project'
-                description = 'Projet d\'intégration continue avec Jenkins'
-                url = 'https://github.com/votre-username/votre-repo'
-            }
         }
     }
-
     repositories {
         maven {
-            name = 'MyMavenRepo'
-            url = System.getenv('MAVEN_REPO_URL') ?: 'https://mymavenrepo.com/repo/your-repo-id'
-            credentials {
-                username = System.getenv('MAVEN_REPO_USERNAME') ?: 'username'
-                password = System.getenv('MAVEN_REPO_PASSWORD') ?: 'password'
-            }
+            // 🔑 Utilisez VOTRE URL Write depuis MyMavenRepo
+            url = 'https://mymavenrepo.com/repo/cEmjfkxugPlzLxXg1A2B/'
+            // ⚠️ Pas besoin de credentials si vous utilisez l’URL unique (sécurité par défaut)
         }
     }
-}
-
-// Tâche Cucumber pour les tests BDD
-task cucumber(type: JavaExec) {
-    dependsOn assemble, testClasses
-
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'io.cucumber.core.cli.Main'
-
-    args = [
-            '--plugin', 'pretty',
-            '--plugin', 'json:build/cucumber-report.json',
-            '--plugin', 'html:build/cucumber-report.html',
-            '--plugin', 'junit:build/cucumber-report.xml',
-            '--glue', 'com.example.steps',
-            'src/test/resources/features'
-    ]
-}
-
-// Tâche pour générer la Javadoc
-javadoc {
-    options.encoding = 'UTF-8'
-    options.charSet = 'UTF-8'
-    failOnError = false
-}
-
-// Tâche pour nettoyer complètement le projet
-task cleanAll(type: Delete) {
-    delete rootProject.buildDir
-    delete fileTree(dir: '.', include: '**/*.log')
-}
-
-// Configuration pour ignorer les avertissements de compilation
-tasks.withType(JavaCompile) {
-    options.warnings = false
-    options.deprecation = false
-}
-//
-//hello guys
-// Wrapper Gradle (pour garder une version spécifique de Gradle)
-wrapper {
-    gradleVersion = '8.3'
-    distributionType = Wrapper.DistributionType.ALL
 }
